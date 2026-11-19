@@ -1,19 +1,19 @@
 # MiniLiDAR
 
-Reconstrucción monocular experimental: convierte un video en una nube de puntos coloreada, una trayectoria de cámara y una vista aérea. Utiliza ORB + PnP, Depth Anything V2 Metric Small y Open3D. El visor 3D funciona localmente en el navegador.
+Experimental monocular reconstruction: turn a video into a colored point cloud, an estimated camera trajectory, and a top-down view. Built with ORB + PnP, Depth Anything V2 Metric Small, and Open3D. The interactive 3D viewer runs locally in your browser.
 
-## Resultados
+## Results
 
-Ejemplo de la secuencia KITTI 06 distribuida con pySLAM. Son resultados reales del programa, no imágenes generadas.
+Example reconstruction from the KITTI 06 sequence distributed with pySLAM.
 
-![Nube de puntos 3D de KITTI 06](docs/images/kitti-3d.jpg)
-![Proyección aérea de KITTI 06](docs/images/kitti-top.jpg)
+![KITTI 06 colored 3D point cloud](docs/images/kitti-3d.jpg)
+![KITTI 06 top-down projection](docs/images/kitti-top.jpg)
 
-La reconstrucción de ejemplo es parcial: 151 poses aceptadas hasta el fotograma 750. No representa precisión LiDAR.
+This example is a partial reconstruction: 151 accepted poses through frame 750. It does not provide LiDAR-level accuracy.
 
-## Instalación
+## Installation
 
-Python 3.11 recomendado. Probado en macOS; la disponibilidad de Open3D depende de la plataforma y versión de Python.
+Python 3.11 is recommended. Tested on macOS; Open3D availability depends on your platform and Python version.
 
 ```bash
 python3 -m venv .venv
@@ -23,50 +23,52 @@ mkdir -p vendor
 git clone https://github.com/DepthAnything/Depth-Anything-V2.git vendor/depth-anything-v2
 ```
 
-Los pesos métricos Small se descargan desde Hugging Face durante la primera ejecución. Después se pueden reutilizar desde la caché. También pueden colocarse en `modelos/`. El código y los pesos de terceros conservan sus propias licencias; no están incluidos en este repositorio.
+The Small metric depth weights are downloaded from Hugging Face on the first run and reused from the cache afterward. You can also place them in `modelos/`. Third-party code and model weights retain their respective licenses and are not bundled in this repository.
 
-## Uso
+## Usage
 
 ```bash
-python ejecutar.py "/ruta/habitacion.mp4"
-python ejecutar.py "/ruta/exterior.mp4" --exterior
-python ejecutar.py "/ruta/habitacion.mp4" --calibracion "/ruta/camara.yaml"
+python ejecutar.py "/path/to/room.mp4"
+python ejecutar.py "/path/to/outdoor.mp4" --exterior
+python ejecutar.py "/path/to/room.mp4" --calibracion "/path/to/camera.yaml"
 python ejecutar.py --abrir-ultimo
 ```
 
-En macOS también puedes usar `./mapear`. Ajusta resolución, intervalo entre fotogramas y densidad en `configuracion.json`. Sin calibración se usa un campo de visión aproximado: calibra la cámara para obtener mejores resultados.
+Existing command names and flags are preserved for compatibility. `--exterior` selects the outdoor model, `--calibracion` supplies camera calibration, and `--abrir-ultimo` opens the latest result.
 
-## Archivos generados
+On macOS, you can also run `bash mapear "/path/to/video.mp4"`. Adjust resolution, frame stride, and point density in `configuracion.json`. Without calibration, the program uses an approximate field of view. Calibrate your camera for better results.
 
-Cada ejecución crea una carpeta independiente en `resultados/`:
+## Output files
 
-| Archivo | Contenido |
+Each run creates a separate folder under `resultados/`:
+
+| File | Contents |
 | --- | --- |
-| `mapa_3d.html` | Visor interactivo 3D y vista aérea |
-| `nube_3d.ply` | Puntos 3D con color |
-| `trayectoria.csv` | Poses estimadas por fotograma |
-| `vista_superior.png` | Proyección X–Z |
-| `resumen.json` | Configuración y resultado del seguimiento |
-| `tracking.jsonl` | Diagnóstico por fotograma |
+| `mapa_3d.html` | Interactive 3D viewer and top-down view |
+| `nube_3d.ply` | Colored 3D point cloud |
+| `trayectoria.csv` | Estimated camera poses by frame |
+| `vista_superior.png` | X–Z projection |
+| `resumen.json` | Configuration and tracking summary |
+| `tracking.jsonl` | Per-frame tracking diagnostics |
 
-## Código
+## Project structure
 
-- `ejecutar.py`: entrada, validación de rutas y ejecución.
-- `mini_lidar_orb_depth.py`: profundidad, ORB, PnP y reconstrucción.
-- `visor_3d.py`: visor HTML sin servicios externos.
-- `tests/`: pruebas geométricas sin descargar modelos.
+- `ejecutar.py`: command-line entry point, path validation, and execution.
+- `mini_lidar_orb_depth.py`: depth estimation, ORB features, PnP, and reconstruction.
+- `visor_3d.py`: self-contained HTML viewer.
+- `tests/`: geometry tests that do not require model downloads.
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-## Límites
+## Limitations
 
-La profundidad y escala son estimadas. No incluye IMU, cierre de bucles ni optimización global. Puede perder seguimiento, acumular deriva o exportar solo una parte del video. La vista aérea no es un mapa de ocupación ni se alinea automáticamente al suelo. No está diseñado para medición, navegación autónoma o decisiones de seguridad.
+Depth and scale are estimated. There is no IMU integration, loop closure, or global optimization. Tracking can fail, drift can accumulate, and a run may reconstruct only part of a video. The top-down view is not an occupancy map and is not automatically aligned with the floor. This project is not intended for measurement, autonomous navigation, or safety-critical decisions.
 
-## Créditos
+## Credits
 
-- [Depth Anything V2](https://github.com/DepthAnything/Depth-Anything-V2): estimación de profundidad.
-- [OpenCV](https://opencv.org/): características ORB y PnP.
-- [Open3D](https://www.open3d.org/): manejo de nubes.
-- [KITTI](https://www.cvlibs.net/datasets/kitti/) y [pySLAM](https://github.com/luigifreda/pyslam): secuencia utilizada para los ejemplos. Las imágenes de resultados se incluyen para documentar esta prueba; los videos del dataset no se redistribuyen.
+- [Depth Anything V2](https://github.com/DepthAnything/Depth-Anything-V2): depth estimation.
+- [OpenCV](https://opencv.org/): ORB features and PnP.
+- [Open3D](https://www.open3d.org/): point-cloud processing.
+- [KITTI](https://www.cvlibs.net/datasets/kitti/) and [pySLAM](https://github.com/luigifreda/pyslam): example sequence. Result images document this experiment; dataset videos are not redistributed.
