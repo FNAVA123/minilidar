@@ -1,0 +1,11 @@
+{
+  "scene": "indoor",
+  "fov_deg": 60,
+  "width": 640,
+  "stride": 5,
+  "input_size": 392,
+  "voxel": 0.05,
+  "pixel_step": 4,
+  "max_points": 2000000,
+  "recovery_seconds": 3
+}
